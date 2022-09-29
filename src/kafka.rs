@@ -40,10 +40,32 @@ pub async fn run_async_processor(worker_id: usize) -> Result<(), Error> {
     tracing::info!(worker_id, "listening for messages");
     loop {
         let message = consumer.recv().await?;
-        handle_message(&message).await;
+        receive_message(&consumer, &message).await;
     }
 }
 
-async fn handle_message(message: &BorrowedMessage<'_>,) {
+async fn receive_message(
+    consumer: &StreamConsumer,
+    message: &BorrowedMessage<'_>,
+) {
+    let result = handle_message(message).await;
+    match result {
+        Ok(_) => {
+            tracing::info!("message handled successfully");
+        }
+        Err(e) => {
+            tracing::error!(
+                error = e.to_string(),
+                "failed while handling message"
+            );
+        }
+    };
+    if let Err(e) = consumer.store_offset_from_message(&message) {
+        tracing::warn!(error = e.to_string(), "failed to store offset");
+    };
+}
+
+async fn handle_message(message: &BorrowedMessage<'_>,) -> Result<(), Error> {
     tracing::info!("message! len: {}", message.payload_len());
+    Ok(())
 }
