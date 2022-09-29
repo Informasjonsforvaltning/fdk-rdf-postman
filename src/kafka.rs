@@ -1,4 +1,7 @@
-use std::env;
+use std::{
+    env,
+    time::Instant,
+};
 use lazy_static::lazy_static;
 use rdkafka::{
     config::RDKafkaLogLevel,
@@ -7,7 +10,10 @@ use rdkafka::{
     message::BorrowedMessage,
     ClientConfig,
 };
-use crate::error::Error;
+use crate::{
+    error::Error,
+    metrics::{PROCESSED_MESSAGES, PROCESSING_TIME},
+};
 
 lazy_static! {
     pub static ref BROKERS: String = env::var("BROKERS").unwrap_or("localhost:9092".to_string());
@@ -48,18 +54,24 @@ async fn receive_message(
     consumer: &StreamConsumer,
     message: &BorrowedMessage<'_>,
 ) {
+    let start_time = Instant::now();
     let result = handle_message(message).await;
+    let elapsed_millis = start_time.elapsed().as_millis();
     match result {
         Ok(_) => {
-            tracing::info!("message handled successfully");
+            tracing::info!(elapsed_millis, "message handled successfully");
+            PROCESSED_MESSAGES.with_label_values(&["success"]).inc();
         }
         Err(e) => {
             tracing::error!(
+                elapsed_millis,
                 error = e.to_string(),
                 "failed while handling message"
             );
+            PROCESSED_MESSAGES.with_label_values(&["error"]).inc();
         }
     };
+    PROCESSING_TIME.observe(elapsed_millis as f64 / 1000.0);
     if let Err(e) = consumer.store_offset_from_message(&message) {
         tracing::warn!(error = e.to_string(), "failed to store offset");
     };
