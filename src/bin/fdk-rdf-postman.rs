@@ -1,5 +1,9 @@
 use actix_web::{get, App, HttpServer, Responder};
-use futures::{FutureExt};
+use futures::{
+    stream::{FuturesUnordered, StreamExt},
+    FutureExt,
+};
+use fdk_rdf_postman::kafka::run_async_processor;
 
 #[get("/ping")]
 async fn ping() -> impl Responder {
@@ -12,7 +16,7 @@ async fn ready() -> impl Responder {
 }
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> () {
     tracing_subscriber::fmt()
         .json()
         .with_max_level(tracing::Level::INFO)
@@ -20,13 +24,30 @@ async fn main() -> std::io::Result<()> {
         .with_current_span(false)
         .init();
 
-    HttpServer::new(|| App::new().service(ping).service(ready))
+    let http_server = tokio::spawn(HttpServer::new(|| App::new().service(ping).service(ready))
         .bind(("0.0.0.0", 8080))
         .unwrap_or_else(|e| {
             tracing::error!(error = e.to_string(), "server error");
             std::process::exit(1);
         })
         .run()
-        .map(|f| f.map_err(|e| e.into()))
-        .await
+        .map(|f| f.map_err(|e| e.into())),
+    );
+
+    (0..4)
+        .map(|i| tokio::spawn(run_async_processor(i)))
+        .chain(std::iter::once(http_server))
+        .collect::<FuturesUnordered<_>>()
+        .for_each(|result| async {
+            result
+                .unwrap_or_else(|e| {
+                    tracing::error!(error = e.to_string(), "unable to run worker thread");
+                    std::process::exit(1);
+                })
+                .unwrap_or_else(|e| {
+                    tracing::error!(error = e.to_string(), "worker failed");
+                    std::process::exit(1);
+                });
+        })
+        .await;
 }
