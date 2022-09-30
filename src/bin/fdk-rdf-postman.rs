@@ -4,8 +4,9 @@ use futures::{
     FutureExt,
 };
 use fdk_rdf_postman::{
-    kafka::run_async_processor,
-    metrics::{get_metrics, register_metrics}
+    kafka::{create_sr_settings, run_async_processor},
+    metrics::{get_metrics, register_metrics},
+    schemas::setup_schemas,
 };
 
 #[get("/ping")]
@@ -40,6 +41,16 @@ async fn main() -> () {
 
     register_metrics();
 
+    let sr_settings = create_sr_settings().unwrap_or_else(|e| {
+        tracing::error!(error = e.to_string(), "sr settings creation error");
+        std::process::exit(1);
+    });
+
+    setup_schemas(&sr_settings).await.unwrap_or_else(|e| {
+        tracing::error!(error = e.to_string(), "schema registration error");
+        std::process::exit(1);
+    });
+
     let http_server = tokio::spawn(
         HttpServer::new(|| App::new().service(ping).service(ready).service(metrics))
             .bind(("0.0.0.0", 8080))
@@ -52,7 +63,7 @@ async fn main() -> () {
     );
 
     (0..4)
-        .map(|i| tokio::spawn(run_async_processor(i)))
+        .map(|i| tokio::spawn(run_async_processor(i, sr_settings.clone())))
         .chain(std::iter::once(http_server))
         .collect::<FuturesUnordered<_>>()
         .for_each(|result| async {

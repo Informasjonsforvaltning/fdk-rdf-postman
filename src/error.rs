@@ -7,6 +7,10 @@ pub enum Error {
     IoError(#[from] std::io::Error),
     #[error(transparent)]
     KafkaError(#[from] KafkaError),
+    #[error(transparent)]
+    AvroError(#[from] avro_rs::Error),
+    #[error(transparent)]
+    SRCError(#[from] schema_registry_converter::error::SRCError),
     #[error("{0}")]
     String(String),
 }
