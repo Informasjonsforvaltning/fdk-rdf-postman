@@ -1,24 +1,50 @@
 use std::{
     env,
-    time::Instant,
+    time::{Duration, Instant},
 };
+use avro_rs::schema::Name;
 use lazy_static::lazy_static;
 use rdkafka::{
     config::RDKafkaLogLevel,
     consumer::{Consumer, StreamConsumer},
     error::KafkaError,
     message::BorrowedMessage,
-    ClientConfig,
+    ClientConfig, Message,
+};
+use schema_registry_converter::{
+    async_impl::{
+        avro::AvroDecoder,
+        schema_registry::SrSettings,
+    },
+    avro_common::DecodeResult,
 };
 use crate::{
     error::Error,
     metrics::{PROCESSED_MESSAGES, PROCESSING_TIME},
+    schemas::{DatasetEvent, InputEvent},
 };
 
 lazy_static! {
     pub static ref BROKERS: String = env::var("BROKERS").unwrap_or("localhost:9092".to_string());
+    pub static ref SCHEMA_REGISTRY: String =
+        env::var("SCHEMA_REGISTRY").unwrap_or("http://localhost:8081".to_string());
     pub static ref INPUT_TOPIC: String =
         env::var("INPUT_TOPIC").unwrap_or("dataset-events".to_string());
+}
+
+pub fn create_sr_settings() -> Result<SrSettings, Error> {
+    let mut schema_registry_urls = SCHEMA_REGISTRY.split(",");
+
+    let mut sr_settings_builder =
+        SrSettings::new_builder(schema_registry_urls.next().unwrap_or_default().to_string());
+    schema_registry_urls.for_each(|url| {
+        sr_settings_builder.add_url(url.to_string());
+    });
+
+    let sr_settings = sr_settings_builder
+        .set_timeout(Duration::from_secs(5))
+        .build()?;
+    Ok(sr_settings)
 }
 
 pub fn create_consumer() -> Result<StreamConsumer, KafkaError> {
@@ -38,24 +64,26 @@ pub fn create_consumer() -> Result<StreamConsumer, KafkaError> {
     Ok(consumer)
 }
 
-pub async fn run_async_processor(worker_id: usize) -> Result<(), Error> {
+pub async fn run_async_processor(worker_id: usize, sr_settings: SrSettings) -> Result<(), Error> {
     tracing::info!(worker_id, "starting worker");
 
     let consumer = create_consumer()?;
+    let mut decoder = AvroDecoder::new(sr_settings);
 
     tracing::info!(worker_id, "listening for messages");
     loop {
         let message = consumer.recv().await?;
-        receive_message(&consumer, &message).await;
+        receive_message(&consumer, &mut decoder, &message).await;
     }
 }
 
 async fn receive_message(
     consumer: &StreamConsumer,
+    decoder: &mut AvroDecoder<'_>,
     message: &BorrowedMessage<'_>,
 ) {
     let start_time = Instant::now();
-    let result = handle_message(message).await;
+    let result = handle_message(decoder, message).await;
     let elapsed_millis = start_time.elapsed().as_millis();
     match result {
         Ok(_) => {
@@ -77,7 +105,44 @@ async fn receive_message(
     };
 }
 
-async fn handle_message(message: &BorrowedMessage<'_>,) -> Result<(), Error> {
-    tracing::info!("message! len: {}", message.payload_len());
+async fn handle_message(
+    decoder: &mut AvroDecoder<'_>,
+    message: &BorrowedMessage<'_>,
+) -> Result<(), Error> {
+    match decode_message(decoder, message).await? {
+        InputEvent::DatasetEvent(event) => {
+            let key = event.fdk_id.clone();
+            tracing::info!("dataset event with id {} decoded", key);
+        }
+        InputEvent::Unknown { namespace, name } => {
+            tracing::warn!(namespace, name, "skipping unknown event");
+        }
+    }
     Ok(())
+}
+
+async fn decode_message(
+    decoder: &mut AvroDecoder<'_>,
+    message: &BorrowedMessage<'_>,
+) -> Result<InputEvent, Error> {
+    match decoder.decode(message.payload()).await? {
+        DecodeResult {
+            name:
+                Some(Name {
+                     name,
+                     namespace: Some(namespace),
+                     ..
+                 }),
+            value,
+        } => {
+            let event = match (namespace.as_str(), name.as_str()) {
+                ("no.fdk.dataset", "DatasetEvent") => {
+                    InputEvent::DatasetEvent(avro_rs::from_value::<DatasetEvent>(&value)?)
+                }
+                _ => InputEvent::Unknown { namespace, name },
+            };
+            Ok(event)
+        }
+        _ => Err("unable to identify event without namespace and name".into()),
+    }
 }
