@@ -1,12 +1,12 @@
 use serde_derive::Deserialize;
 
 pub enum InputEvent {
-    DatasetEvent(DatasetEvent),
+    HarvestEvent(HarvestEvent),
     Unknown { namespace: String, name: String },
 }
 
 #[derive(Debug, Deserialize)]
-pub enum DatasetEventType {
+pub enum HarvestEventType {
     #[serde(rename = "DATASET_HARVESTED")]
     DatasetHarvested,
     #[serde(other)]
@@ -14,9 +14,9 @@ pub enum DatasetEventType {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct DatasetEvent {
+pub struct HarvestEvent {
     #[serde(rename = "type")]
-    pub event_type: DatasetEventType,
+    pub event_type: HarvestEventType,
     #[serde(rename = "fdkId")]
     pub fdk_id: String,
     pub graph: String,
