@@ -21,7 +21,7 @@ use schema_registry_converter::{
 use crate::{
     error::Error,
     metrics::{PROCESSED_MESSAGES, PROCESSING_TIME},
-    schemas::{DatasetEvent, InputEvent},
+    schemas::{HarvestEvent, InputEvent},
 };
 
 lazy_static! {
@@ -110,9 +110,9 @@ async fn handle_message(
     message: &BorrowedMessage<'_>,
 ) -> Result<(), Error> {
     match decode_message(decoder, message).await? {
-        InputEvent::DatasetEvent(event) => {
+        InputEvent::HarvestEvent(event) => {
             let key = event.fdk_id.clone();
-            tracing::info!("dataset event with id {} decoded", key);
+            tracing::info!("harvest event with id {} decoded", key);
         }
         InputEvent::Unknown { namespace, name } => {
             tracing::warn!(namespace, name, "skipping unknown event");
@@ -137,7 +137,7 @@ async fn decode_message(
         } => {
             let event = match (namespace.as_str(), name.as_str()) {
                 ("no.fdk.dataset", "DatasetEvent") => {
-                    InputEvent::DatasetEvent(avro_rs::from_value::<DatasetEvent>(&value)?)
+                    InputEvent::HarvestEvent(avro_rs::from_value::<HarvestEvent>(&value)?)
                 }
                 _ => InputEvent::Unknown { namespace, name },
             };
