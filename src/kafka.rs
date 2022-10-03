@@ -20,6 +20,7 @@ use schema_registry_converter::{
 };
 use crate::{
     error::Error,
+    diff_store::post_event_graph_to_diff_store,
     metrics::{PROCESSED_MESSAGES, PROCESSING_TIME},
     schemas::{HarvestEvent, InputEvent},
 };
@@ -69,11 +70,12 @@ pub async fn run_async_processor(worker_id: usize, sr_settings: SrSettings) -> R
 
     let consumer = create_consumer()?;
     let mut decoder = AvroDecoder::new(sr_settings);
+    let http_client = reqwest::Client::new();
 
     tracing::info!(worker_id, "listening for messages");
     loop {
         let message = consumer.recv().await?;
-        receive_message(&consumer, &mut decoder, &message).await;
+        receive_message(&consumer, &mut decoder, &message, &http_client).await;
     }
 }
 
@@ -81,9 +83,10 @@ async fn receive_message(
     consumer: &StreamConsumer,
     decoder: &mut AvroDecoder<'_>,
     message: &BorrowedMessage<'_>,
+    http_client: &reqwest::Client,
 ) {
     let start_time = Instant::now();
-    let result = handle_message(decoder, message).await;
+    let result = handle_message(decoder, message, http_client).await;
     let elapsed_millis = start_time.elapsed().as_millis();
     match result {
         Ok(_) => {
@@ -108,17 +111,17 @@ async fn receive_message(
 async fn handle_message(
     decoder: &mut AvroDecoder<'_>,
     message: &BorrowedMessage<'_>,
+    http_client: &reqwest::Client,
 ) -> Result<(), Error> {
     match decode_message(decoder, message).await? {
         InputEvent::HarvestEvent(event) => {
-            let key = event.fdk_id.clone();
-            tracing::info!("harvest event with id {} decoded", key);
+            post_event_graph_to_diff_store(event, http_client).await
         }
         InputEvent::Unknown { namespace, name } => {
             tracing::warn!(namespace, name, "skipping unknown event");
+            Ok(())
         }
     }
-    Ok(())
 }
 
 async fn decode_message(

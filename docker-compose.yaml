@@ -73,3 +73,9 @@ services:
     depends_on:
       schema-registry:
         condition: service_healthy
+
+  fdk-rdf-diff-store:
+    image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-diff-store:latest
+    container_name: fdk-rdf-diff-store
+    ports:
+      - "8090:80"
