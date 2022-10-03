@@ -6,7 +6,6 @@ use futures::{
 use fdk_rdf_postman::{
     kafka::{create_sr_settings, run_async_processor},
     metrics::{get_metrics, register_metrics},
-    schemas::setup_schemas,
 };
 
 #[get("/ping")]
@@ -43,11 +42,6 @@ async fn main() -> () {
 
     let sr_settings = create_sr_settings().unwrap_or_else(|e| {
         tracing::error!(error = e.to_string(), "sr settings creation error");
-        std::process::exit(1);
-    });
-
-    setup_schemas(&sr_settings).await.unwrap_or_else(|e| {
-        tracing::error!(error = e.to_string(), "schema registration error");
         std::process::exit(1);
     });
 
