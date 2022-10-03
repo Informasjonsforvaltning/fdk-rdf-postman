@@ -10,6 +10,8 @@ pub enum Error {
     #[error(transparent)]
     AvroError(#[from] avro_rs::Error),
     #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
+    #[error(transparent)]
     SRCError(#[from] schema_registry_converter::error::SRCError),
     #[error("{0}")]
     String(String),
