@@ -18,3 +18,6 @@ thiserror = "1.0.37"
 tokio = { version = "1.21.2", features = ["full"] }
 tracing = "0.1.36"
 tracing-subscriber =  { version = "0.3.11", features = ["json"] }
+
+[dev-dependencies]
+httptest = "0.15.4"
