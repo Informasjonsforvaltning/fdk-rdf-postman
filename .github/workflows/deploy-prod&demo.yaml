@@ -20,7 +20,7 @@ jobs:
   deploy_dataset:
     name: Deploy fdk-dataset-postman to prod environment with reusable workflow
     needs: [build]
-    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@at/kustomize
+    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-dataset-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
@@ -34,7 +34,7 @@ jobs:
   deploy_dataset_demo:
     name: Deploy fdk-dataset-postman to demo environment with reusable workflow
     needs: [deploy_dataset]
-    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@at/kustomize
+    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-dataset-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
