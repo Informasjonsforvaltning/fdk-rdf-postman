@@ -22,7 +22,7 @@ jobs:
     name: Deploy fdk-dataset-postman to staging environment with reusable workflow
     if: github.event.pull_request.draft == false
     needs: [build]
-    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@at/kustomize
+    uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-dataset-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:staging_latest
