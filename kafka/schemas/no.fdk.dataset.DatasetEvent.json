@@ -9,7 +9,8 @@
                 "type": "enum",
                 "name": "DatasetEventType",
                 "symbols": [
-                    "DATASET_HARVESTED"
+                    "DATASET_HARVESTED",
+                    "DATASET_REMOVED"
                 ]
             }
         },

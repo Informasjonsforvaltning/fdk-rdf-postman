@@ -9,6 +9,8 @@ pub enum InputEvent {
 pub enum HarvestEventType {
     #[serde(rename = "DATASET_HARVESTED")]
     DatasetHarvested,
+    #[serde(rename = "DATASET_REMOVED")]
+    DatasetRemoved,
     #[serde(other)]
     Unknown,
 }

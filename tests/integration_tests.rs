@@ -37,7 +37,9 @@ async fn test() {
         ",
     ).await;
 
-    // Assert that scoring api received expected requests.
+    assert_delete(&server, "fdk-id").await;
+
+    // Assert that the diff store received expected requests.
     server.verify_and_clear();
 }
 
@@ -47,10 +49,26 @@ pub struct DiffStoreGraph {
     pub graph: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct DiffStoreID {
+    pub id: String,
+}
+
 impl Matcher<DiffStoreGraph> for DiffStoreGraph {
     fn matches(&mut self, expected: &DiffStoreGraph, _ctx: &mut ExecutionContext) -> bool {
         assert_eq!(expected.id, self.id);
         assert_eq!(expected.graph, self.graph);
+        true
+    }
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as fmt::Debug>::fmt(self, f)
+    }
+}
+
+impl Matcher<DiffStoreID> for DiffStoreID {
+    fn matches(&mut self, expected: &DiffStoreID, _ctx: &mut ExecutionContext) -> bool {
+        assert_eq!(expected.id, self.id);
         true
     }
 
@@ -88,6 +106,41 @@ async fn assert_transformation(
             request::method("POST"),
             request::path("/api/graphs"),
             request::body(json_decoded::<DiffStoreGraph, DiffStoreGraph>(expected_body)),
+        ])
+            .respond_with(status_code(200)),
+    );
+
+    // Produce message to topic.
+    TestProducer::new(&INPUT_TOPIC)
+        .produce(&input_message, "no.fdk.dataset.DatasetEvent")
+        .await;
+
+    // Wait for worker to process message and assert result is ok.
+    processor.await.unwrap();
+}
+
+async fn assert_delete(server: &Server, id: &str) {
+    let consumer = create_consumer().unwrap();
+    // Clear topic of all existing messages.
+    consume_all_messages(&consumer).await.unwrap();
+    // Start async process.
+    let processor = process_single_message(consumer);
+
+    // Create test event.
+    let input_message = HarvestEvent {
+        event_type: HarvestEventType::DatasetRemoved,
+        timestamp: 1647698566000,
+        fdk_id: id.to_string(),
+        graph: "".to_string(),
+    };
+
+    let expected_body = DiffStoreID { id: id.to_string() };
+
+    server.expect(
+        Expectation::matching(all_of![
+            request::method("DELETE"),
+            request::path("/api/graphs"),
+            request::body(json_decoded::<DiffStoreID, DiffStoreID>(expected_body)),
         ])
             .respond_with(status_code(200)),
     );
