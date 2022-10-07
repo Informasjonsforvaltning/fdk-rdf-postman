@@ -108,7 +108,7 @@ async fn receive_message(
     };
 }
 
-async fn handle_message(
+pub async fn handle_message(
     decoder: &mut AvroDecoder<'_>,
     message: &BorrowedMessage<'_>,
     http_client: &reqwest::Client,
