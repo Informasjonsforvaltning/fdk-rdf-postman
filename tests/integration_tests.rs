@@ -97,6 +97,6 @@ async fn assert_transformation(
         .produce(&input_message, "no.fdk.dataset.DatasetEvent")
         .await;
 
-    // Wait for node-namer to process message and assert result is ok.
+    // Wait for worker to process message and assert result is ok.
     processor.await.unwrap();
 }
