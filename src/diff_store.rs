@@ -4,7 +4,7 @@ use reqwest::StatusCode;
 use serde::Serialize;
 use crate::{
     error::Error,
-    schemas::HarvestEvent,
+    schemas::{HarvestEvent, HarvestEventType},
 };
 
 lazy_static! {
@@ -18,7 +18,54 @@ struct DiffStoreGraph {
     pub graph: String,
 }
 
-pub async fn post_event_graph_to_diff_store(
+#[derive(Debug, Serialize)]
+struct DiffStoreID {
+    pub id: String,
+}
+
+pub async fn update_diff_store(
+    event: HarvestEvent,
+    http_client: &reqwest::Client,
+) -> Result<(), Error> {
+    match event.event_type {
+        HarvestEventType::DatasetHarvested => {
+            post_event_graph_to_diff_store(event, http_client).await
+        }
+        HarvestEventType::DatasetRemoved => {
+            delete_graph_in_diff_store(event, http_client).await
+        }
+        HarvestEventType::Unknown => {
+            Ok(())
+        }
+    }
+}
+
+async fn delete_graph_in_diff_store(
+    event: HarvestEvent,
+    http_client: &reqwest::Client,
+) -> Result<(), Error> {
+    let response = http_client
+        .delete(format!(
+            "{}/api/graphs",
+            DIFF_STORE_URL.clone()
+        ))
+        .header("X-API-KEY", DIFF_STORE_KEY.clone())
+        .json(&DiffStoreID {id: event.fdk_id})
+        .send()
+        .await?;
+
+    if response.status() == StatusCode::OK {
+        Ok(())
+    } else {
+        Err(format!(
+            "Invalid response when deleting from diff store: {} - {}",
+            response.status(),
+            response.text().await?
+        ).into())
+    }
+}
+
+async fn post_event_graph_to_diff_store(
     event: HarvestEvent,
     http_client: &reqwest::Client,
 ) -> Result<(), Error> {
@@ -39,7 +86,6 @@ pub async fn post_event_graph_to_diff_store(
             "Invalid response from diff store: {} - {}",
             response.status(),
             response.text().await?
-        )
-            .into())
+        ).into())
     }
 }

@@ -20,7 +20,7 @@ use schema_registry_converter::{
 };
 use crate::{
     error::Error,
-    diff_store::post_event_graph_to_diff_store,
+    diff_store::update_diff_store,
     metrics::{PROCESSED_MESSAGES, PROCESSING_TIME},
     schemas::{HarvestEvent, InputEvent},
 };
@@ -115,7 +115,7 @@ pub async fn handle_message(
 ) -> Result<(), Error> {
     match decode_message(decoder, message).await? {
         InputEvent::HarvestEvent(event) => {
-            post_event_graph_to_diff_store(event, http_client).await
+            update_diff_store(event, http_client).await
         }
         InputEvent::Unknown { namespace, name } => {
             tracing::warn!(namespace, name, "skipping unknown event");
