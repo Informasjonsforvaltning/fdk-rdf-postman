@@ -67,7 +67,7 @@ async fn assert_transformation(
     let consumer = create_consumer().unwrap();
     // Clear topic of all existing messages.
     consume_all_messages(&consumer).await.unwrap();
-    // Start async node-namer process.
+    // Start async process.
     let processor = process_single_message(consumer);
 
     // Create test event.
