@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fdk-dataset-postman
-  namespace: staging
+  namespace: prod
   labels:
     app: fdk-dataset-postman
 spec:
