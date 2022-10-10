@@ -50,7 +50,7 @@ async fn delete_graph_in_diff_store(
             DIFF_STORE_URL.clone()
         ))
         .header("X-API-KEY", DIFF_STORE_KEY.clone())
-        .json(&DiffStoreID {id: event.fdk_id})
+        .json(&DiffStoreID {id: event.fdk_id.clone()})
         .send()
         .await?;
 
@@ -58,7 +58,8 @@ async fn delete_graph_in_diff_store(
         Ok(())
     } else {
         Err(format!(
-            "Invalid response when deleting from diff store: {} - {}",
+            "Invalid response when deleting {} from diff store: {} - {}",
+            event.fdk_id,
             response.status(),
             response.text().await?
         ).into())
@@ -75,7 +76,7 @@ async fn post_event_graph_to_diff_store(
             DIFF_STORE_URL.clone()
         ))
         .header("X-API-KEY", DIFF_STORE_KEY.clone())
-        .json(&DiffStoreGraph {id: event.fdk_id, graph: event.graph})
+        .json(&DiffStoreGraph {id: event.fdk_id.clone(), graph: event.graph})
         .send()
         .await?;
 
@@ -83,7 +84,8 @@ async fn post_event_graph_to_diff_store(
         Ok(())
     } else {
         Err(format!(
-            "Invalid response from diff store: {} - {}",
+            "Invalid response from diff store for {}: {} - {}",
+            event.fdk_id,
             response.status(),
             response.text().await?
         ).into())
