@@ -90,7 +90,7 @@ async fn assert_transformation(
 
     // Create test event.
     let input_message = HarvestEvent {
-        event_type: HarvestEventType::DatasetHarvested,
+        event_type: HarvestEventType::DatasetReasoned,
         timestamp: 1647698566000,
         fdk_id: id.to_string(),
         graph: input.to_string(),
