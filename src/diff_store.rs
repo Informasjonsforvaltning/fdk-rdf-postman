@@ -29,6 +29,9 @@ pub async fn update_diff_store(
 ) -> Result<(), Error> {
     match event.event_type {
         HarvestEventType::DatasetHarvested => {
+            Ok(())
+        }
+        HarvestEventType::DatasetReasoned => {
             post_event_graph_to_diff_store(event, http_client).await
         }
         HarvestEventType::DatasetRemoved => {
