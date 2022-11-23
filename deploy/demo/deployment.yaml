@@ -33,7 +33,7 @@ spec:
           - name: DIFF_STORE_KEY
             valueFrom:
               secretKeyRef:
-                name: fdk-rdf-diff-store
+                name: fdk-dataset-rdf-diff-store
                 key: API_KEY
           name: fdk-dataset-postman
           image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
