@@ -34,7 +34,7 @@ pub fn register_metrics() {
     REGISTRY
         .register(Box::new(PROCESSING_TIME.clone()))
         .unwrap_or_else(|e| {
-            tracing::error!(error = e.to_string(), "response_time collector error");
+            tracing::error!(error = e.to_string(), "processing_time collector error");
             std::process::exit(1);
         });
 }

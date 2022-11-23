@@ -34,7 +34,7 @@ lazy_static! {
 }
 
 pub fn create_sr_settings() -> Result<SrSettings, Error> {
-    let mut schema_registry_urls = SCHEMA_REGISTRY.split(",");
+    let mut schema_registry_urls = SCHEMA_REGISTRY.split(',');
 
     let mut sr_settings_builder =
         SrSettings::new_builder(schema_registry_urls.next().unwrap_or_default().to_string());
@@ -87,23 +87,26 @@ async fn receive_message(
 ) {
     let start_time = Instant::now();
     let result = handle_message(decoder, message, http_client).await;
-    let elapsed_millis = start_time.elapsed().as_millis();
-    match result {
+    let elapsed_seconds = start_time.elapsed().as_secs_f64();
+
+    let metric_label = match result {
         Ok(_) => {
-            tracing::info!(elapsed_millis, "message handled successfully");
-            PROCESSED_MESSAGES.with_label_values(&["success"]).inc();
+            tracing::info!(elapsed_seconds, "message handled successfully");
+            PROCESSING_TIME.observe(elapsed_seconds);
+            "success"
         }
         Err(e) => {
             tracing::error!(
-                elapsed_millis,
+                elapsed_seconds,
                 error = e.to_string(),
                 "failed while handling message"
             );
-            PROCESSED_MESSAGES.with_label_values(&["error"]).inc();
+            "error"
         }
     };
-    PROCESSING_TIME.observe(elapsed_millis as f64 / 1000.0);
-    if let Err(e) = consumer.store_offset_from_message(&message) {
+    PROCESSED_MESSAGES.with_label_values(&[metric_label]).inc();
+
+    if let Err(e) = consumer.store_offset_from_message(message) {
         tracing::warn!(error = e.to_string(), "failed to store offset");
     };
 }
