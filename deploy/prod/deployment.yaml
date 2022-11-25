@@ -29,11 +29,11 @@ spec:
                 name: fdk-metadata-quality-prod
                 key: SCHEMA_REGISTRY
           - name: DIFF_STORE_URL
-            value: http://fdk-dataset-diff-store:80
+            value: http://fdk-dataset-rdf-diff-writer:80
           - name: DIFF_STORE_KEY
             valueFrom:
               secretKeyRef:
-                name: fdk-rdf-diff-store
+                name: fdk-dataset-rdf-diff-store
                 key: API_KEY
           name: fdk-dataset-postman
           image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
