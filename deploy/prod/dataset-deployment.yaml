@@ -35,6 +35,8 @@ spec:
               secretKeyRef:
                 name: fdk-dataset-rdf-diff-store
                 key: API_KEY
+          - name: INPUT_TOPIC
+            value: dataset-events
           name: fdk-dataset-postman
           image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
           ports:
