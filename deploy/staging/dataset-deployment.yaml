@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fdk-dataset-postman
-  namespace: demo
+  namespace: staging
   labels:
     app: fdk-dataset-postman
 spec:
@@ -21,12 +21,12 @@ spec:
           - name: BROKERS
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-demo
+                name: fdk-metadata-quality-staging
                 key: BROKERS
           - name: SCHEMA_REGISTRY
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-demo
+                name: fdk-metadata-quality-staging
                 key: SCHEMA_REGISTRY
           - name: DIFF_STORE_URL
             value: http://fdk-dataset-rdf-diff-writer:8080
@@ -35,8 +35,10 @@ spec:
               secretKeyRef:
                 name: fdk-dataset-rdf-diff-store
                 key: API_KEY
+          - name: INPUT_TOPIC
+            value: dataset-events
           name: fdk-dataset-postman
-          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
+          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:staging_latest
           ports:
             - containerPort: 8080
           livenessProbe:
