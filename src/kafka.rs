@@ -142,6 +142,9 @@ async fn decode_message(
             value,
         } => {
             let event = match (namespace.as_str(), name.as_str()) {
+                ("no.fdk.concept", "ConceptEvent") => {
+                    InputEvent::HarvestEvent(avro_rs::from_value::<HarvestEvent>(&value)?)
+                }
                 ("no.fdk.dataset", "DatasetEvent") => {
                     InputEvent::HarvestEvent(avro_rs::from_value::<HarvestEvent>(&value)?)
                 }

@@ -25,13 +25,13 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GCP_SA_DIGDIR_FDK_GCR_KEY: ${{ secrets.GCP_SA_DIGDIR_FDK_GCR_KEY }}
 
-  deploy_dataset:
-    name: Deploy fdk-dataset-postman to staging environment with reusable workflow
+  deploy:
+    name: Deploy all fdk-rdf-postman versions to staging environment with reusable workflow
     if: github.event.pull_request.draft == false
     needs: [test, build]
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
-      app_name: fdk-dataset-postman
+      app_name: fdk-rdf-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:staging_latest
       environment: staging
       cluster: digdir-fdk-dev

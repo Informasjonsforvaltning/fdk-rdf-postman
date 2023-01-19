@@ -23,12 +23,12 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GCP_SA_DIGDIR_FDK_GCR_KEY: ${{ secrets.GCP_SA_DIGDIR_FDK_GCR_KEY }}
 
-  deploy_dataset:
-    name: Deploy fdk-dataset-postman to prod environment with reusable workflow
+  deploy:
+    name: Deploy all fdk-rdf-postman versions to prod environment with reusable workflow
     needs: [test, build]
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
-      app_name: fdk-dataset-postman
+      app_name: fdk-rdf-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
       environment: prod
       cluster: digdir-fdk-prod
@@ -37,12 +37,12 @@ jobs:
       DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_PROD_AUTODEPLOY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  deploy_dataset_demo:
-    name: Deploy fdk-dataset-postman to demo environment with reusable workflow
-    needs: [deploy_dataset]
+  deploy_demo:
+    name: Deploy all fdk-rdf-postman versions to demo environment with reusable workflow
+    needs: [deploy]
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
-      app_name: fdk-dataset-postman
+      app_name: fdk-rdf-postman
       image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
       environment: demo
       cluster: digdir-fdk-dev
