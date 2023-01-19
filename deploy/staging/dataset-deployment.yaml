@@ -38,7 +38,7 @@ spec:
           - name: INPUT_TOPIC
             value: dataset-events
           name: fdk-dataset-postman
-          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:staging_latest
+          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:$(GIT_COMMIT_SHA)
           ports:
             - containerPort: 8080
           livenessProbe:
