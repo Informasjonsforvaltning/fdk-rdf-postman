@@ -5,7 +5,7 @@ pub enum InputEvent {
     Unknown { namespace: String, name: String },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub enum HarvestEventType {
     #[serde(rename = "DATASET_HARVESTED")]
     DatasetHarvested,
@@ -13,6 +13,12 @@ pub enum HarvestEventType {
     DatasetReasoned,
     #[serde(rename = "DATASET_REMOVED")]
     DatasetRemoved,
+    #[serde(rename = "CONCEPT_HARVESTED")]
+    ConceptHarvested,
+    #[serde(rename = "CONCEPT_REASONED")]
+    ConceptReasoned,
+    #[serde(rename = "CONCEPT_REMOVED")]
+    ConceptRemoved,
     #[serde(other)]
     Unknown,
 }

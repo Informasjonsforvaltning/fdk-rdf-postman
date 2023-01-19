@@ -18,6 +18,8 @@ spec:
     spec:
       containers:
         - env:
+          - name: POSTMAN_TYPE
+            value: dataset
           - name: BROKERS
             valueFrom:
               secretKeyRef:
