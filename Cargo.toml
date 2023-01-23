@@ -11,7 +11,7 @@ lazy_static = "1.4.0"
 prometheus = "0.13.2"
 rdkafka = "0.28.0"
 reqwest = "0.11.12"
-schema_registry_converter = { version = "2.1.0", features = ["avro", "futures", "rustls_tls"], default-features=false }
+schema_registry_converter = { version = "3.1.0", features = ["avro", "futures", "rustls_tls"], default-features=false }
 serde = "1.0.137"
 serde_derive = "1.0.137"
 thiserror = "1.0.37"
