@@ -8,7 +8,7 @@ pub enum Error {
     #[error(transparent)]
     KafkaError(#[from] KafkaError),
     #[error(transparent)]
-    AvroError(#[from] avro_rs::Error),
+    AvroError(#[from] apache_avro::Error),
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
     #[error(transparent)]
