@@ -145,6 +145,9 @@ async fn decode_message(
                 ("no.fdk.concept", "ConceptEvent") => {
                     InputEvent::HarvestEvent(apache_avro::from_value::<HarvestEvent>(&value)?)
                 }
+                ("no.fdk.dataservice", "DataServiceEvent") => {
+                    InputEvent::HarvestEvent(apache_avro::from_value::<HarvestEvent>(&value)?)
+                }
                 ("no.fdk.dataset", "DatasetEvent") => {
                     InputEvent::HarvestEvent(apache_avro::from_value::<HarvestEvent>(&value)?)
                 }

@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fdk-data-service-postman
+  labels:
+    app: fdk-data-service-postman
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fdk-data-service-postman
+  template:
+    metadata:
+      labels:
+        app: fdk-data-service-postman
+    spec:
+      containers:
+        - env:
+          - name: POSTMAN_TYPE
+            value: dataservice
+          - name: BROKERS
+            valueFrom:
+              secretKeyRef:
+                name: kafka
+                key: BROKERS
+          - name: SCHEMA_REGISTRY
+            valueFrom:
+              secretKeyRef:
+                name: kafka
+                key: SCHEMA_REGISTRY
+          - name: DIFF_STORE_URL
+            value: http://fdk-data-service-rdf-diff-writer:8080
+          - name: DIFF_STORE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fdk-data-service-rdf-diff-store
+                key: API_KEY
+          - name: INPUT_TOPIC
+            value: data-service-events
+          name: fdk-data-service-postman
+          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:$(GIT_COMMIT_SHA)
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080

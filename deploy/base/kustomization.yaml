@@ -4,5 +4,7 @@ kind: Kustomization
 resources:
   - concept-deployment.yaml
   - concept-service.yaml
+  - data-service-service.yaml
+  - data-service-deployment.yaml
   - dataset-deployment.yaml
   - dataset-service.yaml

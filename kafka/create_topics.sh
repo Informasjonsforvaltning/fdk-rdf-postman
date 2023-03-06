@@ -3,9 +3,8 @@ while ! /bin/kafka-topics --bootstrap-server localhost:9092 --list; do
     sleep 1
 done
 
-for topic in dataset-events concept-events; do
+for topic in dataset-events concept-events data-service-events; do
     kafka-topics --bootstrap-server localhost:9092 \
         --create --if-not-exists \
         --topic "${topic}"
 done
-

@@ -19,6 +19,12 @@ pub enum HarvestEventType {
     ConceptReasoned,
     #[serde(rename = "CONCEPT_REMOVED")]
     ConceptRemoved,
+    #[serde(rename = "DATA_SERVICE_HARVESTED")]
+    DataServiceHarvested,
+    #[serde(rename = "DATA_SERVICE_REASONED")]
+    DataServiceReasoned,
+    #[serde(rename = "DATA_SERVICE_REMOVED")]
+    DataServiceRemoved,
     #[serde(other)]
     Unknown,
 }

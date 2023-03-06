@@ -27,6 +27,7 @@ struct DiffStoreID {
 #[derive(Clone)]
 pub enum PostmanType {
     Dataset,
+    DataService,
     Concept,
     Unknown,
 }
@@ -59,6 +60,9 @@ fn get_postman_type(postman_type_string: String) -> PostmanType {
         "dataset" => {
             PostmanType::Dataset
         }
+        "dataservice" => {
+            PostmanType::DataService
+        }
         "concept" => {
             PostmanType::Concept
         }
@@ -75,6 +79,12 @@ fn event_to_action(event_type: HarvestEventType) -> DiffStoreAction {
             DiffStoreAction::PostGraph
         }
         (HarvestEventType::DatasetRemoved, PostmanType::Dataset) => {
+            DiffStoreAction::DeleteGraph
+        }
+        (HarvestEventType::DataServiceReasoned, PostmanType::DataService) => {
+            DiffStoreAction::PostGraph
+        }
+        (HarvestEventType::DataServiceRemoved, PostmanType::DataService) => {
             DiffStoreAction::DeleteGraph
         }
         (HarvestEventType::ConceptReasoned, PostmanType::Concept) => {
