@@ -2,7 +2,7 @@ use std::{
     env,
     time::{Duration, Instant},
 };
-use avro_rs::schema::Name;
+use apache_avro::schema::Name;
 use lazy_static::lazy_static;
 use rdkafka::{
     config::RDKafkaLogLevel,
@@ -143,10 +143,10 @@ async fn decode_message(
         } => {
             let event = match (namespace.as_str(), name.as_str()) {
                 ("no.fdk.concept", "ConceptEvent") => {
-                    InputEvent::HarvestEvent(avro_rs::from_value::<HarvestEvent>(&value)?)
+                    InputEvent::HarvestEvent(apache_avro::from_value::<HarvestEvent>(&value)?)
                 }
                 ("no.fdk.dataset", "DatasetEvent") => {
-                    InputEvent::HarvestEvent(avro_rs::from_value::<HarvestEvent>(&value)?)
+                    InputEvent::HarvestEvent(apache_avro::from_value::<HarvestEvent>(&value)?)
                 }
                 _ => InputEvent::Unknown { namespace, name },
             };
