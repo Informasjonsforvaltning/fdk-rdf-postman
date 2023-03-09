@@ -2,44 +2,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fdk-dataset-postman
-  namespace: staging
+  name: fdk-concept-postman
   labels:
-    app: fdk-dataset-postman
+    app: fdk-concept-postman
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fdk-dataset-postman
+      app: fdk-concept-postman
   template:
     metadata:
       labels:
-        app: fdk-dataset-postman
+        app: fdk-concept-postman
     spec:
       containers:
         - env:
           - name: POSTMAN_TYPE
-            value: dataset
+            value: concept
           - name: BROKERS
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-staging
+                name: kafka
                 key: BROKERS
           - name: SCHEMA_REGISTRY
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-staging
+                name: kafka
                 key: SCHEMA_REGISTRY
           - name: DIFF_STORE_URL
-            value: http://fdk-dataset-rdf-diff-writer:8080
+            value: http://fdk-concept-rdf-diff-writer:8080
           - name: DIFF_STORE_KEY
             valueFrom:
               secretKeyRef:
-                name: fdk-dataset-rdf-diff-store
+                name: fdk-concept-rdf-diff-store
                 key: API_KEY
           - name: INPUT_TOPIC
-            value: dataset-events
-          name: fdk-dataset-postman
+            value: concept-events
+          name: fdk-concept-postman
           image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:$(GIT_COMMIT_SHA)
           ports:
             - containerPort: 8080
