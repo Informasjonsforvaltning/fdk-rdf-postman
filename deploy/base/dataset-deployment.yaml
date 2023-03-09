@@ -3,7 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fdk-dataset-postman
-  namespace: prod
   labels:
     app: fdk-dataset-postman
 spec:
@@ -23,12 +22,12 @@ spec:
           - name: BROKERS
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-prod
+                name: kafka
                 key: BROKERS
           - name: SCHEMA_REGISTRY
             valueFrom:
               secretKeyRef:
-                name: fdk-metadata-quality-prod
+                name: kafka
                 key: SCHEMA_REGISTRY
           - name: DIFF_STORE_URL
             value: http://fdk-dataset-rdf-diff-writer:8080
