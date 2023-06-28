@@ -15,6 +15,7 @@ jobs:
 
   build:
     name: Build with reusable workflow when merging to main
+    needs: [test]
     uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@main
     with:
       app_name: fdk-rdf-postman
@@ -29,7 +30,6 @@ jobs:
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-rdf-postman
-      image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
       environment: prod
       cluster: digdir-fdk-prod
     secrets:
@@ -43,7 +43,6 @@ jobs:
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-rdf-postman
-      image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:latest
       environment: demo
       cluster: digdir-fdk-dev
     secrets:
