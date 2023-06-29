@@ -8,3 +8,7 @@ resources:
   - data-service-deployment.yaml
   - dataset-deployment.yaml
   - dataset-service.yaml
+images:
+  - name: fdk-rdf-postman
+    newName: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman
+    newTag: $(GIT_COMMIT_SHA)
