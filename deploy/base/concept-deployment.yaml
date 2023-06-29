@@ -39,9 +39,12 @@ spec:
           - name: INPUT_TOPIC
             value: concept-events
           name: fdk-concept-postman
-          image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:$(GIT_COMMIT_SHA)
+          image: fdk-rdf-postman
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              memory: "25Mi"
           livenessProbe:
             httpGet:
               path: /ping

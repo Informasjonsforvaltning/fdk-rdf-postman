@@ -16,7 +16,8 @@ jobs:
 
   build:
     name: Build with reusable workflow when pull request is created
-    if: github.event.pull_request.draft == false
+    if: ${{ github.actor != 'dependabot[bot]' && github.event.pull_request.draft == false }}
+    needs: [test]
     uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@main
     with:
       app_name: fdk-rdf-postman
@@ -32,7 +33,6 @@ jobs:
     uses: Informasjonsforvaltning/workflows/.github/workflows/kustomize-deploy.yaml@main
     with:
       app_name: fdk-rdf-postman
-      image: eu.gcr.io/digdir-fdk-infra/fdk-rdf-postman:staging_latest
       environment: staging
       cluster: digdir-fdk-dev
     secrets:
