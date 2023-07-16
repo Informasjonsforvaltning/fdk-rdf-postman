@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.3.1"
-apache-avro = "0.14.0"
+apache-avro = "0.15.0"
 futures = "0.3.28"
 lazy_static = "1.4.0"
 prometheus = "0.13.2"
