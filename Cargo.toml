@@ -14,7 +14,7 @@ reqwest = "0.11.16"
 schema_registry_converter = { version = "3.1.0", features = ["avro", "futures", "rustls_tls"], default-features=false }
 serde = "1.0.160"
 serde_derive = "1.0.137"
-thiserror = "1.0.40"
+thiserror = "1.0.44"
 tokio = { version = "1.27.0", features = ["full"] }
 tracing = "0.1.36"
 tracing-subscriber =  { version = "0.3.11", features = ["json"] }
