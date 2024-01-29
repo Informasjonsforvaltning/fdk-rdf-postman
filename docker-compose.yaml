@@ -40,7 +40,7 @@ services:
     # Ready when custom topics are created.
     # Make sure number at the end (after 'grep') matches desired topics.
     healthcheck:
-      test: ["CMD-SHELL", "/bin/kafka-topics --bootstrap-server 127.0.0.1:9092 --list | sed \"/_.*/d\" | wc -l | grep 2"]
+      test: ["CMD-SHELL", "/bin/kafka-topics --bootstrap-server 127.0.0.1:9092 --list | sed \"/_.*/d\" | wc -l | grep 3"]
       interval: 3s
 
   schema-registry:
